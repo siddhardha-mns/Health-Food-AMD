@@ -1,14 +1,9 @@
 .git
-.gitignore
 README.md
 frontend/
 node_modules/
-
-# Backend runtime-only exclusions
 backend/node_modules/
 backend/dist/
-backend/src/
-backend/tsconfig.json
 backend/.env
 backend/.env.*
 *.log
