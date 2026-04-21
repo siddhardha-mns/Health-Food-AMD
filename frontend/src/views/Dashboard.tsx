@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useGamification } from '../hooks/useGamification';
-import { Activity, Flame, ActivitySquare, Target, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Activity, Flame, ActivitySquare, Target, ChevronRight, CheckCircle2, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const fadeIn = {
