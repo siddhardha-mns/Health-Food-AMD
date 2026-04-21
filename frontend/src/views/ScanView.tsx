@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { Camera, Image as ImageIcon, Upload, Loader2, Sparkles, CheckCircle, ChevronRight } from 'lucide-react';
+import { Camera, Upload, Loader2, Sparkles, CheckCircle, ChevronRight } from 'lucide-react';
 import { useNutrients } from '../hooks/useNutrients';
 import { useNavigate } from 'react-router-dom';
 

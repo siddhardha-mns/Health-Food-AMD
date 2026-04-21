@@ -1,6 +1,6 @@
 import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '../../lib/utils';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'disabled'> {
