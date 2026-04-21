@@ -31,9 +31,10 @@ COPY --from=backend-builder /app/backend/dist ./backend/dist
 # 3. Copy frontend build to a public folder the backend can serve
 COPY --from=frontend-builder /app/frontend/dist ./backend/public
 
-# 4. Set up non-root user
+# 4. Set up non-root user and fix permissions
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nutrisense -u 1001 -G nodejs
+    adduser -S nutrisense -u 1001 -G nodejs && \
+    chown -R nutrisense:nodejs /app
 USER nutrisense
 
 EXPOSE 8080
