@@ -25,16 +25,18 @@ ENV PORT=8080
 COPY backend/package*.json ./backend/
 RUN cd backend && npm ci --omit=dev && npm cache clean --force
 
+# 1.5 Set up non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nutrisense -u 1001 -G nodejs
+
 # 2. Copy backend build
-COPY --from=backend-builder /app/backend/dist ./backend/dist
+COPY --chown=nutrisense:nodejs --from=backend-builder /app/backend/dist ./backend/dist
 
 # 3. Copy frontend build to a public folder the backend can serve
-COPY --from=frontend-builder /app/frontend/dist ./backend/public
+COPY --chown=nutrisense:nodejs --from=frontend-builder /app/frontend/dist ./backend/public
 
-# 4. Set up non-root user and fix permissions
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nutrisense -u 1001 -G nodejs && \
-    chown -R nutrisense:nodejs /app
+# 4. Final adjustments
+RUN chmod -R 755 /app/backend/public
 USER nutrisense
 
 EXPOSE 8080
