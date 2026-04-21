@@ -1,41 +1,43 @@
-# ─── Stage 1: Build ──────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files first for layer caching
-COPY backend/package*.json ./
-
-# Install all dependencies (including devDeps for TypeScript build)
+# ─── Stage 1: Build Frontend ────────────────────────────────────────────────
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
 RUN npm ci
-
-# Copy source
-COPY backend/ .
-
-# Compile TypeScript
+COPY frontend/ .
 RUN npm run build
 
-# ─── Stage 2: Production ─────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+# ─── Stage 2: Build Backend ─────────────────────────────────────────────────
+FROM node:20-alpine AS backend-builder
+WORKDIR /app/backend
+COPY backend/package*.json ./
+RUN npm ci
+COPY backend/ .
+RUN npm run build
 
+# ─── Stage 3: Production Runner ──────────────────────────────────────────────
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=8080
 
-# Copy only production package files
-COPY backend/package*.json ./
+# 1. Install production deps for backend
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --omit=dev && npm cache clean --force
 
-# Install production deps only
-RUN npm ci --omit=dev && npm cache clean --force
+# 2. Copy backend build
+COPY --from=backend-builder /app/backend/dist ./backend/dist
 
-# Copy compiled JS from builder stage
-COPY --from=builder /app/dist ./dist
+# 3. Copy frontend build to a public folder the backend can serve
+COPY --from=frontend-builder /app/frontend/dist ./backend/public
 
-# Non-root user for security
+# 4. Set up non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nutrisense -u 1001 -G nodejs
 USER nutrisense
 
 EXPOSE 8080
 
+# Run from the backend directory
+WORKDIR /app/backend
 CMD ["node", "dist/server.js"]

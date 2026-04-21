@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -62,6 +63,10 @@ app.use((req, _res, next) => {
   next();
 });
 
+// ─── Static Frontend Serving ──────────────────────────────────────────────────
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
 // ─── Health Check ────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.status(200).json({
@@ -74,28 +79,22 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.get('/', (_req, res) => {
-  res.status(200).json({
-    service: 'NutriSense AI API',
-    version: '1.0.0',
-    endpoints: {
-      health: 'GET /health',
-      analyze: 'POST /api/analyze',
-      recommend: 'POST /api/recommend | GET /api/recommend',
-      generateMeal: 'POST /api/generate-meal',
-      gamifyStatus: 'GET /api/gamify/status',
-      gamifyLeaderboard: 'GET /api/gamify/leaderboard',
-      chat: 'POST /api/chat',
-    },
-  });
-});
-
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/recommend', recommendRouter);
 app.use('/api/generate-meal', generateMealRouter);
 app.use('/api/gamify', gamifyRouter);
 app.use('/api/chat', chatRouter);
+
+// ─── SPA Routing Fallback ─────────────────────────────────────────────────────
+// Serve index.html for any route that doesn't match an API or static file
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(publicPath, 'index.html'));
+  } else {
+    res.status(404).json({ status: 'error', message: 'API endpoint not found' });
+  }
+});
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 app.use(notFoundHandler);
